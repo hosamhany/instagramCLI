@@ -1,0 +1,19 @@
+{
+  "name": "clitool",
+  "version": "1.0.0",
+  "description": "cli tool to fetch data from instagram apis and create a csv file",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^2.17.0",
+    "inquirer": "^6.0.0",
+    "instagram-private-api": "^0.6.8",
+    "nodemon": "^1.18.3",
+    "prompt": "^1.0.0",
+    "readline": "^1.3.0"
+  }
+}
