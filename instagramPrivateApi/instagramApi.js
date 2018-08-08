@@ -13,27 +13,16 @@ function createSession(username, password, accountName){
         return [session, Client.Account.searchForUser(session, accountName)]
     })
     .spread(function(session, account) {
-        // console.log(account)
     let feed = new Client.Feed.AccountFollowers(session, account.id, parseInt(account.followerCount))
     feed.all().then((accounts)=>{
         let followers = [];
         let followersUserNames = [];
         for(let item of accounts){
-            followersUserNames.push(item._params.username);
+            followersUserNames.push(item._params);
         }
-        for(let item of followersUserNames){
-        Client.Account.searchForUser(session, item).then((result) =>{
-            for (let item of result._params){
-                followers.push(item);
-            }
-        })
+        followers = _.map(followersUserNames, _.partialRight(_.pick, ['pk', 'username', 'fullName','isPrivate','profilePicUrl']));
+        console.log(followers)
 
-    }
-        // console.log(followers)
-        // _.map(followersNew, followers => _.pick(followers, 'id','_params.username', '_params.fullName', '_params.profilePicUrl'))
-        // console.log(followersNew.length)
-        // console.log(followers);
-        // writeIntoFile(followers);
         })
     })
     // .catch(()=>{
@@ -42,7 +31,7 @@ function createSession(username, password, accountName){
 }
 
 function writeIntoFile(followers){
-    fs.writeFile(__dirname + "/../utils/followers.csv", followers, { flag: 'w' }, function (err) {
+    fs.writeFile(__dirname + "/../result.csv", followers, { flag: 'w' }, function (err) {
         if (err) throw err;
         console.log("It's saved!");
     });
@@ -51,3 +40,4 @@ module.exports = {
     createSession
 }
 //node --max-old-space-size=4096 yourFile.js
+//TODO: try the getCursor approach along with 
