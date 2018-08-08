@@ -25,9 +25,9 @@ function createSession(username, password, accountName){
 
         })
     })
-    // .catch(()=>{
-    //     console.log("\x1b[31m", "Connection Error, please try again later.")
-    // });
+    .catch((err)=>{
+        console.log("\x1b[31m", "Connection Error: ", err.message);
+    });
 }
 
 function writeIntoFile(followers){
