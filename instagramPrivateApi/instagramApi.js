@@ -3,7 +3,7 @@ var device = new Client.Device('testDevice');
 var Promise = require('bluebird');
 var _ = require('lodash');
 var fs = require('fs');
-
+var async = require('async');
 // var __dirname = "~"
 var storage = new Client.CookieFileStorage(__dirname + '/../utils/cookies/session.json');
 
@@ -16,13 +16,30 @@ function createSession(username, password, accountName){
     let feed = new Client.Feed.AccountFollowers(session, account.id, parseInt(account.followerCount))
     feed.all().then((accounts)=>{
         let followers = [];
-        let followersUserNames = [];
+        followersIds = [];
         for(let item of accounts){
-            followersUserNames.push(item._params);
+            followersIds.push(item.id);
         }
-        followers = _.map(followersUserNames, _.partialRight(_.pick, ['pk', 'username', 'fullName','isPrivate','profilePicUrl']));
-        console.log(followers)
 
+        // console.log(followersIds);
+        while(followersIds.length !=0){
+            var dataToWrite;
+            async.mapLimit(followersIds, 2, (followerId, callback) => {
+                Client.Account.getById(session, followerId).then((res) =>{
+                    console.log(res._params);
+                    // followers = _.map(res._params, _.partialRight(_.pick, ['pk', 'username', 'fullName','isPrivate','profilePicUrl', 'mediaCount', 'biography', 'followerCount', 'followingCount', 'externalUrl']));
+                    // dataToWrite= res._params;
+                    // console.log(followers)
+                    setTimeout(1500);
+
+                    
+                })
+            });
+          followersIds.shift();
+          followersIds.shift();
+          
+            
+        }
         })
     })
     .catch((err)=>{
@@ -35,6 +52,7 @@ function writeIntoFile(followers){
         if (err) throw err;
         console.log("It's saved!");
     });
+    setTimeout(500);
 }
 module.exports = {
     createSession
