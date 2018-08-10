@@ -17,16 +17,24 @@ function createSession(username, password, accountName) {
             let feed = new Client.Feed.AccountFollowers(session, account.id, parseInt(account.followerCount))
             feed.all().then((accounts) => {
                 let followers = [];
-                let followers2 = [];
                 followersIds = [];
                 for (let item of accounts) {
                     followersIds.push(item.id);
                 }
-                var followersDivided= chunkify(followersIds, 1400, false);
+                var followersDivided= chunkify(followersIds, 100, false);
                 console.error(followersDivided.length);
-                var first = followersDivided[0]
+                while((first = followersDivided.pop()) !=null){
                 console.error(first.length);
-
+                first.forEach(id => {
+                    Client.Account.getById(session, id).then((details) => {
+                        user = details._params;
+                        followers.push(createUserDetails(user.profilePicUrl,user.pk, user.username, user.fullName, user.biography, user.followerCount, user.followingCount, user.isPrivate, user.mediaCount, user.externalUrl));
+                        // console.log(followers);
+                        writeIntoFile(followers)
+                    })
+                })
+            sleep(20000)
+            }
             
         //still not working too many API hits
                 // x.forEach((arr)=>{
@@ -39,29 +47,27 @@ function createSession(username, password, accountName) {
                 //         })
                 //     })
                 // })
-
-
-
-
-
-                // followersIds.forEach(followerID => {
-                //     Client.Account.getById(session, followerID).then((details) => {
-                //         followers.push(details);
-                //         console.log(followers.length)
-                //     })
-                //         .catch((err) => {
-                //             Promise.resolve().delay(3000);
-                //             console.log(err);
-                //         })
-                // })
-
             })
         })
         .catch((err) => {
             console.log("\x1b[31m", "Connection Error: ", err.message);
         });
 }
-
+function createUserDetails(profilePicUrl, pk, username, fullName, biography, followerCount, followingCount, isPrivate, mediaCount, externalUrl){
+    
+    return {
+        'profilePicUrl': profilePicUrl,
+        'userId': pk,
+        'username': username, 
+        'fullName': fullName,
+        'biography': biography,
+        'followerCount': followerCount,
+        'followingCount': followingCount,
+        'isPrivate': isPrivate,
+        'mediaCount': mediaCount,
+        'externalUrl': externalUrl
+    }
+}
 function chunkify(a, n, balanced) {
     if (n < 2)
         return [a];
@@ -95,11 +101,13 @@ function chunkify(a, n, balanced) {
 }
 
 function writeIntoFile(followers) {
-    fs.writeFile(__dirname + "/../result.csv", followers, { flag: 'w' }, function (err) {
-        if (err) throw err;
-        console.log("It's saved!");
-    });
-    setTimeout(500);
+    followers.forEach((follower)=> {
+        fs.writeFile(__dirname + "/../result.csv", JSON.stringify(followers), { flag: 'w' }, function (err) {
+            if (err) throw err;
+            console.log("It's saved!");
+        });
+    })
+   
 }
 module.exports = {
     createSession,
