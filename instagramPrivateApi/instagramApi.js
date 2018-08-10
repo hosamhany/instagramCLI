@@ -21,7 +21,8 @@ function createSession(username, password, accountName){
             followersUserNames.push(item._params);
         }
         followers = _.map(followersUserNames, _.partialRight(_.pick, ['pk', 'username', 'fullName','isPrivate','profilePicUrl']));
-        console.log(followers)
+        // console.log(followers)
+        writeIntoFile(followers)
 
         })
     })
@@ -31,9 +32,9 @@ function createSession(username, password, accountName){
 }
 
 function writeIntoFile(followers){
-    fs.writeFile(__dirname + "/../result.csv", followers, { flag: 'w' }, function (err) {
+    fs.writeFile(__dirname + "/../result.csv", JSON.stringify(followers), { flag: 'w' }, function (err) {
         if (err) throw err;
-        console.log("It's saved!");
+        console.log("Followers' data is saved in result.csv file");
     });
 }
 module.exports = {
