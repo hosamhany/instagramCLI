@@ -5,60 +5,51 @@ var _ = require('lodash');
 var fs = require('fs');
 var sleep = require('system-sleep')
 var async = require('async');
-// var __dirname = "~"
 var storage = new Client.CookieFileStorage(__dirname + '/../utils/cookies/session.json');
 
-function createSession(username, password, accountName) {
+function createSession(username, password) {
     Client.Session.create(device, storage, username, password)
         .then((session) => {
-            return [session, Client.Account.searchForUser(session, accountName)]
+            return [session, Client.Account.searchForUser(session, "saschafirtina")]
         })
         .spread(function (session, account) {
             let feed = new Client.Feed.AccountFollowers(session, account.id, parseInt(account.followerCount))
             feed.all().then((accounts) => {
                 let followers = [];
                 followersIds = [];
+                //pushing the followrs' Ids into an array
                 for (let item of accounts) {
                     followersIds.push(item.id);
                 }
-                var followersDivided= chunkify(followersIds, 100, false);
-                console.error(followersDivided.length);
-                while((first = followersDivided.pop()) !=null){
-                console.error(first.length);
-                first.forEach(id => {
-                    Client.Account.getById(session, id).then((details) => {
-                        user = details._params;
-                        followers.push(createUserDetails(user.profilePicUrl,user.pk, user.username, user.fullName, user.biography, user.followerCount, user.followingCount, user.isPrivate, user.mediaCount, user.externalUrl));
-                        // console.log(followers);
-                        writeIntoFile(followers)
+                //breaking down the array of Ids into several arrays to send batch requests
+                var followersDivided = chunkify(followersIds, 1400, false);
+                /// console.error(followersDivided.length);
+                //looping on every batch to be sent to get the details of every account ID
+                while ((first = followersDivided.pop()) != null) {
+                    console.error(first.length);
+                    first.forEach(id => {
+                        Client.Account.getById(session, id).then((details) => {
+                            user = details._params;
+                            followers.push(createUserDetails(user.profilePicUrl, user.id, user.username, user.fullName, user.biography, user.followerCount, user.followingCount, user.isPrivate, user.mediaCount, user.externalUrl));
+                            writeIntoFile(followers)
+                            ///console.log("Batch done")
+                        })
                     })
-                })
-            sleep(20000)
-            }
-            
-        //still not working too many API hits
-                // x.forEach((arr)=>{
-                //     arr.forEach((data)=>{
-                //         Client.Account.getById(session, data).then((details) => {
-                //             followers = _.map(details._params, _.partialRight(_.pick, ['pk', 'username', 'fullName','isPrivate','profilePicUrl', 'mediaCount', 'biography', 'followerCount', 'followingCount', 'externalUrl']));
-                //             // followers.push(details._params)
-                //             console.log(followers[followers.length-1])
-                //             console.log(followers.length)
-                //         })
-                //     })
-                // })
+                    sleep(20000)
+                }
             })
         })
         .catch((err) => {
             console.log("\x1b[31m", "Connection Error: ", err.message);
         });
 }
-function createUserDetails(profilePicUrl, pk, username, fullName, biography, followerCount, followingCount, isPrivate, mediaCount, externalUrl){
-    
+//builder method that takes certain data from the results and formulates the requested data only
+function createUserDetails(profilePicUrl, pk, username, fullName, biography, followerCount, followingCount, isPrivate, mediaCount, externalUrl) {
+
     return {
         'profilePicUrl': profilePicUrl,
         'userId': pk,
-        'username': username, 
+        'username': username,
         'fullName': fullName,
         'biography': biography,
         'followerCount': followerCount,
@@ -101,43 +92,20 @@ function chunkify(a, n, balanced) {
 }
 
 function writeIntoFile(followers) {
-    followers.forEach((follower)=> {
+    followers.forEach((follower) => {
         fs.writeFile(__dirname + "/../result.csv", JSON.stringify(followers), { flag: 'w' }, function (err) {
             if (err) throw err;
             console.log("It's saved!");
         });
     })
-   
+
 }
 module.exports = {
     createSession,
     chunkify
 }
-//node --max-old-space-size=4096 yourFile.js
+//node --max-old-space-size=4096 cliTool.js
 //TODO: try the getCursor approach along with 
-
-
-        // for (var i = 0; i< followersIds.length; i++){
-        //         Client.Account.getById(session, followersIds[i]).then((res) =>{
-        //             console.log(res._params);
-        //             followers.push(res._params);
-        //             console.log(followers.length);
-        //         }, (res) => {
-        //             followers2.push(res)
-        //         })
-        // }
-        // console.log(followersIds);
-        // while(followersIds.length !=0){
-        //     var dataToWrite;
-        //     async.mapLimit(followersIds, 100, function (followerId) {
-        //         setTimeout(Client.Account.getById(session, followerId).then((res) =>{
-        //             console.log(res._params);
-        //             followers.push(res._params);
-        //             console.log(followers.length);
-        //             followersIds.shift();
-
-
-        //         }), 1000);
-        //     });          
-
-        // }
+        //getCursor() did not really work.
+        //proxy apporach, needs resources
+        //edited in the feeds.json to catch the RequestLimitError and retry once again, did not work

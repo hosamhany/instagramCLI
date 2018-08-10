@@ -8,15 +8,15 @@ program
     .description('instagram cli tool');
 //this updates the session of the user
 program
-    .command('getFollowers <accountName>')
+    .command('getFollowers')
     .alias('gf')
     .description('gets the followers of the account input')
-    .action((accountName) => {
+    .action(() => {
             prompt.start();
             console.log("Please login..")
             
             prompt.get(schema.schema, function (err, result) {
-                console.log("Fetching",accountName+"'s followers");
+                console.log("Fetching saschafirtina's followers");
                 instagramApi.createSession(result.username, result.password, accountName);
             })
 
