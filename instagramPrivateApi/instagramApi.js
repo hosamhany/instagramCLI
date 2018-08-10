@@ -22,24 +22,28 @@ function createSession(username, password, accountName) {
                 for (let item of accounts) {
                     followersIds.push(item.id);
                 }
-                var x= chunkify(followersIds, 100, false);
-                console.error(x.length);
-               
-                // console.error(first.length);
+                var followersDivided= chunkify(followersIds, 1400, false);
+                console.error(followersDivided.length);
+                var first = followersDivided[0]
+                console.error(first.length);
 
-                x.forEach((arr)=>{
-                    arr.forEach((data)=>{
-                        Client.Account.getById(session, data).then((details) => {
-                            followers.push(details._params)
-                            console.log(followers.length)
-                        })
-                        .catch((error) => {
-                            console.error(error)
-                            Promise.resolve().delay(3000);
-                        })
-                    })
-                    // sleep(1000)
-                })
+            
+        //still not working too many API hits
+                // x.forEach((arr)=>{
+                //     arr.forEach((data)=>{
+                //         Client.Account.getById(session, data).then((details) => {
+                //             followers = _.map(details._params, _.partialRight(_.pick, ['pk', 'username', 'fullName','isPrivate','profilePicUrl', 'mediaCount', 'biography', 'followerCount', 'followingCount', 'externalUrl']));
+                //             // followers.push(details._params)
+                //             console.log(followers[followers.length-1])
+                //             console.log(followers.length)
+                //         })
+                //     })
+                // })
+
+
+
+
+
                 // followersIds.forEach(followerID => {
                 //     Client.Account.getById(session, followerID).then((details) => {
                 //         followers.push(details);
