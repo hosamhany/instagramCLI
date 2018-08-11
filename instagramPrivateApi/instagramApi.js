@@ -27,7 +27,7 @@ function createSession(username, password) {
                 /// console.error(followersDivided.length);
                 //looping on every batch to be sent to get the details of every account ID
                 while ((first = followersDivided.pop()) != null) {
-                    console.error(first.length);
+                    // console.error(first.length);
                     first.forEach(id => {
                         Client.Account.getById(session, id).then((details) => {
                             user = details._params;
