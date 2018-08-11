@@ -5,6 +5,7 @@ var _ = require('lodash');
 var fs = require('fs');
 var sleep = require('system-sleep')
 var async = require('async');
+var lock = require('lockfile')
 var storage = new Client.CookieFileStorage(__dirname + '/../utils/cookies/session.json');
 
 function createSession(username, password) {
@@ -95,9 +96,10 @@ function writeIntoFile(followers) {
     followers.forEach((follower) => {
         fs.writeFile(__dirname + "/../result.csv", JSON.stringify(followers), { flag: 'w' }, function (err) {
             if (err) throw err;
-            console.log("It's saved!");
+            // console.log("It's saved!");
         });
     })
+
 
 }
 module.exports = {

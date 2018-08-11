@@ -17,7 +17,7 @@ program
             
             prompt.get(schema.schema, function (err, result) {
                 console.log("Fetching saschafirtina's followers");
-                instagramApi.createSession(result.username, result.password, accountName);
+                instagramApi.createSession(result.username, result.password);
             })
 
     });
